@@ -5,6 +5,7 @@ from playground.network.packet.fieldtypes import UINT16, STRING, BOOL, UINT32, B
 from playground.network.packet import PacketType
 from playground.asyncio_lib.testing import TestLoopEx
 from playground.network.testing import MockTransportToProtocol
+import sys, time, os, logging, asyncio 
 
 
 
@@ -134,11 +135,7 @@ def UnitTest():
     serverProtocol.connection_made(sTransport)
     clientProtocol.connection_made(cTransport)
     
-if __name__=="__main__":
-	UnitTest()
-	print("Test Success")
-	
-	
+
 """if __name__=="__main__":
 	UnitTest()
 	print("Test Success")"""
@@ -170,10 +167,12 @@ class EchoControl:
             data = data[:-1] # strip off \n
             
        self.txProtocol.send(data)
+       
+USAGE = """usage: echotest <mode>
+  mode is either 'server' or a server's address (client mode)"""
     
 if __name__=="__main__":
     echoArgs = {}
-    
     args= sys.argv[1:]
     i = 0
     for arg in args:
@@ -201,10 +200,10 @@ if __name__=="__main__":
         
     else:
         remoteAddress = mode
-        control = ClientSide()
+        control = EchoControl()
         coro = playground.getConnector().create_playground_connection(lambda: ClientSide(), remoteAddress, 101)
         transport, protocol = loop.run_until_complete(coro)
         print("Echo Client Connected. Starting UI t:{}. p:{}".format(transport, protocol))
         control.connect(protocol)
         loop.run_forever()
-        loop.close()	
+        loop.close()
